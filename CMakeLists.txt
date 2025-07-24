@@ -20,6 +20,14 @@ add_compile_options(
     # -O3
 )
 
+# Add ARM embedded include path for Linux systems
+if(UNIX AND NOT APPLE)
+    add_compile_options(
+        -I/usr/arm-none-eabi/include
+    )
+    message(STATUS "Added Linux-specific ARM include path")
+endif()
+
 # Define the build type
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
@@ -60,6 +68,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Utils/ssd1306_fonts.c
     Utils/encoder.c
     Utils/jy61p.c
+    Utils/angle_control.c
+    Utils/pid_control.c
 )
 
 # Add include paths

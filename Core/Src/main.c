@@ -32,6 +32,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "jy61p.h"
+#include "pid_control.h"
+#include "angle_control.h"
 
 /* USER CODE END Includes */
 
@@ -72,6 +74,10 @@ volatile uint8_t encoder_sample = 0; // How many seconds to read encoder data
 /* This is for the time of user_led */
 volatile uint8_t user_led_time = 0; // How many seconds to turn on the user led
 /* This is the end */
+
+/* This is the declaration of the variables of angle PID control*/
+volatile uint8_t angle_pid_sample = 0; // How many ms to update angle PID
+/* This is the end of declaration to the angle PID*/
 
 /* USER CODE END PV */
 
@@ -135,6 +141,19 @@ int main(void)
   HAL_UART_Receive_IT(&huart5, &g_usart5_receivedata, 1);
   HAL_TIM_Base_Start_IT(&htim5);
 
+  HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_2);
+  HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_2);
+  Motor_Init();
+  Encoder_Init();
+
+  /* Init the PID control here */
+  PID_Init(&pid_motor_a);
+  PID_Init(&pid_motor_b);
+  PID_SetSpeed(PID_MOTOR_A, 60.0f); // Initialize motor A speed to 0
+  PID_SetSpeed(PID_MOTOR_B, 60.0f); // Initialize motor
+  /* Finish init PID control */
 
   /* USER CODE END 2 */
 
@@ -142,7 +161,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
 
     /* This is for our led to check */
     if(user_led_time >= 99)
@@ -152,6 +170,25 @@ int main(void)
     }
     /* This is the end of check, don't move! */
 
+  /* This is for the encoder to update */
+      if (encoder_sample >= 69)
+    {
+      Encoder_Update(&encoderA, 70); // Put into the sample time(ms)
+      Encoder_Update(&encoderB, 70);
+      PID_Update();
+      printf("EncoderA:%.2f,", encoderA.speed_rpp);
+      printf("EncoderB:%.2f,", encoderB.speed_rpp);
+      printf("EncoderA_rpm:%.2f,", encoderA.speed_rpm);
+      printf("EncoderB_rpm:%.2f,", encoderB.speed_rpm);
+      printf("targetA:%.2f,", pid_motor_a.setpoint);
+      printf("targetB:%.2f,", pid_motor_b.setpoint);
+      printf("PID_A:%.2f,", pid_motor_a.output);
+      printf("PID_B:%.2f\r\n", pid_motor_b.output);
+      encoder_sample = 0; // Reset the sample counter
+    }
+  /* This is the end of encoder */
+
+    /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
@@ -179,7 +216,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 25;
+  RCC_OscInitStruct.PLL.PLLM = 8;
   RCC_OscInitStruct.PLL.PLLN = 336;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 4;
@@ -215,6 +252,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     if(user_led_time <99)
     {
       user_led_time++;
+    }
+
+    if (encoder_sample < 69)
+    {
+      encoder_sample++;
     }
     /* End of temp */
   }

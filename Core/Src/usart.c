@@ -176,6 +176,9 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     GPIO_InitStruct.Alternate = GPIO_AF8_UART4;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
+    /* UART4 interrupt Init */
+    HAL_NVIC_SetPriority(UART4_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(UART4_IRQn);
   /* USER CODE BEGIN UART4_MspInit 1 */
 
   /* USER CODE END UART4_MspInit 1 */
@@ -208,6 +211,9 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     GPIO_InitStruct.Alternate = GPIO_AF8_UART5;
     HAL_GPIO_Init(URAT_RX_GYRO_GPIO_Port, &GPIO_InitStruct);
 
+    /* UART5 interrupt Init */
+    HAL_NVIC_SetPriority(UART5_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(UART5_IRQn);
   /* USER CODE BEGIN UART5_MspInit 1 */
 
   /* USER CODE END UART5_MspInit 1 */
@@ -282,6 +288,8 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
     */
     HAL_GPIO_DeInit(GPIOC, UART_TX_BLUETOOTH_Pin|UART_RX_BLUETOOTH_Pin);
 
+    /* UART4 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(UART4_IRQn);
   /* USER CODE BEGIN UART4_MspDeInit 1 */
 
   /* USER CODE END UART4_MspDeInit 1 */
@@ -302,6 +310,8 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 
     HAL_GPIO_DeInit(URAT_RX_GYRO_GPIO_Port, URAT_RX_GYRO_Pin);
 
+    /* UART5 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(UART5_IRQn);
   /* USER CODE BEGIN UART5_MspDeInit 1 */
 
   /* USER CODE END UART5_MspDeInit 1 */
@@ -375,27 +385,22 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     {
       if(rxBufferIndex > 0)
       {
-        // 添加结束
         uartRxBuffer[rxBufferIndex] = 0;
-        // 设置接收完成标志
         rxBufferFlag = 1;
-        // 重置索引
         rxBufferIndex = 0;
       }
     }
-    // 否则将接收到的数据存入缓冲区
     else if(rxBufferIndex < UART_RX_BUFFER_SIZE - 1)
     {
       uartRxBuffer[rxBufferIndex++] = uartRxData;
     }
 
-    // 继续接收下一个字
     HAL_UART_Receive_IT(&huart4, &uartRxData, 1);
   }
-  else if(huart->Instance == UART5) // �??螺仪串口
+  else if(huart->Instance == UART5) // Gyro Uart
   {
-    jy61p_ReceiveData(g_usart5_receivedata); // 调用数据包处理函�??
-    HAL_UART_Receive_IT(&huart5, &g_usart5_receivedata, 1); // 继续中断接收
+    jy61p_ReceiveData(g_usart5_receivedata); // use jy61p to process the data
+    HAL_UART_Receive_IT(&huart5, &g_usart5_receivedata, 1); // contiune
   }
 }
 /* USER CODE END 1 */
