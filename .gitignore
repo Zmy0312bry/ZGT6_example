@@ -1,4 +1,3 @@
 /build
 /.vscode
 /.cache
-/STM32F407ZGTx_FLASH.ld
