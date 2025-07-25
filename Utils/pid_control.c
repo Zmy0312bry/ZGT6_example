@@ -110,12 +110,26 @@ float PID_Compute(PID_TypeDef *pid)
 /**
  * @brief 设置目标电机转速
  * @param motor_id: 电机ID (1-电机A, 2-电机B)
- * @param target_rpm: 目标转速(RPM) - 支持正负值
+ * @param target_value: 目标值 - 根据is_direct_rpp决定单位
+ * @param is_direct_rpp: 控制位 - 1:直接赋值给rpp, 0:表示target_value为rpm需要转换
  * @retval None
  */
-void PID_SetSpeed(PID_Motor_ID motor_id, float target_rpm)
+void PID_SetSpeed(PID_Motor_ID motor_id, float target_value, uint8_t is_direct_rpp)
 {
-    float target_rpp = target_rpm * (ENCODER_RESOLUTION * GEAR_RATIO)/60.0f;
+    float target_rpp;
+    
+    // 根据控制位决定是否需要转换
+    if (is_direct_rpp)
+    {
+        // 直接使用传入值作为rpp
+        target_rpp = target_value;
+    }
+    else
+    {
+        // 将rpm转换为rpp
+        target_rpp = target_value * (ENCODER_RESOLUTION * GEAR_RATIO)/60.0f;
+    }
+    
     if (motor_id == PID_MOTOR_A)
     {
         pid_motor_a.setpoint = target_rpp;
@@ -130,7 +144,7 @@ void PID_SetSpeed(PID_Motor_ID motor_id, float target_rpm)
         else
         {
             /* 根据目标转速的符号预设方向（实际方向由PID输出决定） */
-            pid_motor_a.direction = (target_rpm > 0) ? MOTOR_FORWARD : MOTOR_BACKWARD;
+            pid_motor_a.direction = (target_rpp > 0) ? MOTOR_FORWARD : MOTOR_BACKWARD;
         }
     }
     else if (motor_id == PID_MOTOR_B)
@@ -147,7 +161,7 @@ void PID_SetSpeed(PID_Motor_ID motor_id, float target_rpm)
         else
         {
             /* 根据目标转速的符号预设方向（实际方向由PID输出决定） */
-            pid_motor_b.direction = (target_rpm > 0) ? MOTOR_FORWARD : MOTOR_BACKWARD;
+            pid_motor_b.direction = (target_rpp > 0) ? MOTOR_FORWARD : MOTOR_BACKWARD;
         }
     }
 }
@@ -288,86 +302,6 @@ float AnglePID_Compute(void)
     return angle_pid_yaw.output;
 }
 
-/**
- * @brief 初始化角度环PID控制器
- * @retval None
- */
-void AnglePID_Init(void)
-{
-    /* 初始化PID参数 */
-    angle_pid_yaw.Kp = ANGLE_PID_KP;
-    angle_pid_yaw.Ki = ANGLE_PID_KI;
-    angle_pid_yaw.Kd = ANGLE_PID_KD;
-
-    /* 重置PID状态 */
-    angle_pid_yaw.setpoint = 0.0f;
-    angle_pid_yaw.feedback = 0.0f;
-    angle_pid_yaw.error = 0.0f;
-    angle_pid_yaw.last_error = 0.0f;
-    angle_pid_yaw.integral = 0.0f;
-    angle_pid_yaw.derivative = 0.0f;
-    angle_pid_yaw.output = 0.0f;
-    angle_pid_yaw.final_output = 0.0f;
-
-    /* 设置输出限制 */
-    angle_pid_yaw.output_min = ANGLE_PID_OUTPUT_MIN;
-    angle_pid_yaw.output_max = ANGLE_PID_OUTPUT_MAX;
-
-    angle_pid_yaw.angle_mode = PID_MODE_MANUAL;
-    angle_pid_yaw.base_speed = 0.0f; // 初始基础速度为0
-}
-
-/**
- * @brief 初始化角度环PID控制器
- * @retval None
- */
-void Angle_Self_PID_Set(void)
-{
-    /* 初始化PID参数 */
-    angle_pid_yaw.Kp = ANGLE_SELF_KP;
-    angle_pid_yaw.Ki = ANGLE_SELF_KI;
-    angle_pid_yaw.Kd = ANGLE_SELF_KD;
-
-    /* 重置PID状态 */
-    angle_pid_yaw.setpoint = 0.0f;
-    angle_pid_yaw.feedback = 0.0f;
-    angle_pid_yaw.error = 0.0f;
-    angle_pid_yaw.last_error = 0.0f;
-    angle_pid_yaw.integral = 0.0f;
-    angle_pid_yaw.derivative = 0.0f;
-    angle_pid_yaw.output = 0.0f;
-    angle_pid_yaw.final_output = 0.0f;
-
-    /* 设置输出限制 */
-    angle_pid_yaw.output_min = ANGLE_SELF_OUTPUT_MIN;
-    angle_pid_yaw.output_max = ANGLE_SELF_OUTPUT_MAX;
-
-    angle_pid_yaw.angle_mode = PID_MODE_STRAIGHT_DRIVE;
-    angle_pid_yaw.base_speed = 0.0f; // 初始基础速度为0
-}
-
-/**
- * @brief 设置角度PID目标值
- * @param target_angle: 目标角度(度)
- * @retval None
- */
-void AnglePID_SetTarget(float target_angle)
-{
-    angle_pid_yaw.setpoint = target_angle;
-}
-
-/**
- * @brief 重置角度PID状态
- * @retval None
- */
-void AnglePID_Reset(void)
-{
-    angle_pid_yaw.error = 0.0f;
-    angle_pid_yaw.last_error = 0.0f;
-    angle_pid_yaw.integral = 0.0f;
-    angle_pid_yaw.derivative = 0.0f;
-    angle_pid_yaw.output = 0.0f;
-}
 
 /**
  * @brief 更新角度环PID控制器
@@ -391,7 +325,9 @@ void AnglePID_Update()
         angle_pid_yaw.error = 0.0f;
         angle_pid_yaw.last_error = 0.0f;
         angle_pid_yaw.derivative = 0.0f;
-        yaw_output = 0.0f;
+        angle_pid_yaw.output = 0.0f;
+        Motor_Stop(1); // 停止电机A
+        Motor_Stop(2); // 停止电机B
     }
     else
     {
@@ -401,25 +337,7 @@ void AnglePID_Update()
         motor_b_speed = angle_pid_yaw.base_speed - yaw_output;
         /* 设置电机目标速度，让底层PID根据正负自动确定方向 */
         angle_pid_yaw.final_output = motor_a_speed; // 保存最终输出值
-        PID_SetSpeed(PID_MOTOR_A, motor_a_speed);
-        PID_SetSpeed(PID_MOTOR_B, motor_b_speed);
+        PID_SetSpeed(1, motor_a_speed, 1); // 直接使用rpp
+        PID_SetSpeed(2, motor_b_speed, 1); // 直接使用rpp
     }
-}
-
-/**
- * @brief 停止所有电机
- * @retval None
- */
-void PID_StopAll(void)
-{
-    /* 停止电机 */
-    PID_SetSpeed(PID_MOTOR_A, 0.0f);
-    PID_SetSpeed(PID_MOTOR_B, 0.0f);
-
-    /* 重置控制状态 */
-    angle_pid_yaw.angle_mode = PID_MODE_MANUAL;
-    angle_pid_yaw.base_speed = 0.0f;
-
-    /* 禁用并重置角度PID */
-    AnglePID_Reset();
 }

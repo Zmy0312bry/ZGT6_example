@@ -116,4 +116,12 @@ void Encoder_Update(Encoder_TypeDef *encoder, uint32_t sample_time_ms)
 
     // 计算RPP()自定义每秒
     encoder->speed_rpp = (float)encoder->diff * 1000.0f /sample_time_ms;
+    
+    // 如果是编码器A，将输出值取反
+    if (encoder->id == ENCODER_A)
+    {
+        encoder->diff = -encoder->diff;
+        encoder->speed_rpm = -encoder->speed_rpm;
+        encoder->speed_rpp = -encoder->speed_rpp;
+    }
 }
