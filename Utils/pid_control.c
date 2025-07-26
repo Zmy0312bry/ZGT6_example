@@ -318,7 +318,7 @@ void AnglePID_Update()
 
     float angle_error = Angle_Difference(angle_pid_yaw.setpoint, angle_pid_yaw.feedback);
 
-    if (fabsf(angle_error) <= DEAD_ZONE)
+    if (fabsf(angle_error) <= DEAD_ZONE && angle_pid_yaw.angle_mode == 2)
     {
         /* 在死区内：强制置零积分项和偏差项，不计算PID */
         angle_pid_yaw.integral = 0.0f;

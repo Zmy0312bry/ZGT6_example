@@ -152,7 +152,7 @@ int main(void)
   PID_Init(&pid_motor_a);
   PID_Init(&pid_motor_b);
   AngleControl_Init();
-  SelfTurnTarget(90.0f);
+  SetStraightDrive(80.0f, 0.0f); 
   /* Finish init PID control */
 
   /* USER CODE END 2 */
@@ -178,6 +178,10 @@ int main(void)
       Encoder_Update(&encoderB, 50);
       PID_Update();
       encoder_sample = 0; // Reset the sample counter
+      printf("Yaw: %.2f, rppA: %.2f, rppB: %.2f\r\n", 
+             My_YawAngle, 
+             encoderA.speed_rpp, 
+             encoderB.speed_rpp);
     }
 
     /* This is the code for angle update */

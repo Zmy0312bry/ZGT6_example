@@ -34,28 +34,28 @@ extern "C"
 
 /* PID控制器参数（可调整） */
 // 为电机A和B分别定义PID参数
-#define PID_KP_A 0.3f  // 电机A比例系数默认值
+#define PID_KP_A 0.4f  // 电机A比例系数默认值
 #define PID_KI_A 0.1f // 电机A积分系数默认值
-#define PID_KD_A 0.1f  // 电机A微分系数默认值
+#define PID_KD_A 0.3f  // 电机A微分系数默认值
 
-#define PID_KP_B 0.3f          // 电机B比例系数默认值  纯速度为2.0
+#define PID_KP_B 0.4f          // 电机B比例系数默认值  纯速度为2.0
 #define PID_KI_B 0.1f          // 电机B积分系数默认值   1.4
-#define PID_KD_B 0.1f          // 电机B微分系数默认值   1.0
+#define PID_KD_B 0.3f          // 电机B微分系数默认值   1.0
 #define PID_OUTPUT_MAX 999.0f  // 输出最大值（对应PWM最大值）
 #define PID_OUTPUT_MIN -999.0f    // 输出最小值
 
 /* 角度环PID控制器参数 */
-#define ANGLE_PID_KP 0.4f       // 角度环比例系数默认值
-#define ANGLE_PID_KI 0.01f       // 角度环积分系数默认值  
-#define ANGLE_PID_KD 0.8f       // 角度环微分系数默认值
+#define ANGLE_PID_KP 0.5f       // 角度环比例系数默认值
+#define ANGLE_PID_KI 0.05f       // 角度环积分系数默认值  
+#define ANGLE_PID_KD 0.2f       // 角度环微分系数默认值
 #define ANGLE_SELF_KP 1.2f       // 角度环比例系数默认值
 #define ANGLE_SELF_KI 0.1f       // 角度环积分系数默认值  
-#define ANGLE_SELF_KD 15.0f       // 角度环微分系数默认值
+#define ANGLE_SELF_KD 5.0f       // 角度环微分系数默认值
 #define DEAD_ZONE 3.0f // 角度环死区范围(度)
-#define ANGLE_PID_OUTPUT_MAX 50.0f // 角度环输出最大值(RPM)
-#define ANGLE_PID_OUTPUT_MIN -50.0f // 角度环输出最小值(RPM)
-#define ANGLE_SELF_OUTPUT_MAX 400.0f // 角度环输出最大值(RPM)
-#define ANGLE_SELF_OUTPUT_MIN -400.0f // 角度环输出最小值(RPM)
+#define ANGLE_PID_OUTPUT_MAX 15.0f // 角度环输出最大值(RPP)
+#define ANGLE_PID_OUTPUT_MIN -15.0f // 角度环输出最小值(RPP)
+#define ANGLE_SELF_OUTPUT_MAX 400.0f // 角度环输出最大值(RPP)
+#define ANGLE_SELF_OUTPUT_MIN -400.0f // 角度环输出最小值(RPP)
 
 /* 定义角度来源(二选一) */
 // #define My_YawAngle MPU6050.Yaw_Custom
@@ -84,7 +84,7 @@ typedef struct
     float base_speed; // 基础速度
     uint8_t angle_mode; // 角度控制模式
 
-    
+
 } AnglePID_TypeDef;
 
     /* 电机PID控制器枚举 */
