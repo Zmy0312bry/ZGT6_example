@@ -70,6 +70,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Utils/jy61p.c
     Utils/angle_control.c
     Utils/pid_control.c
+    Utils/flow_decode.c
+    Utils/check.c
 )
 
 # Add include paths

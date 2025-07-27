@@ -38,6 +38,7 @@ extern "C" {
 /* USER CODE BEGIN ET */
 
 extern uint8_t g_usart5_receivedata;
+extern unsigned char ch;
 
 /* USER CODE END ET */
 
