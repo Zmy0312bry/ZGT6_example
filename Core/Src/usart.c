@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file    usart.c
-  * @brief   This file provides code for the configuration
-  *          of the USART instances.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2025 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    usart.c
+ * @brief   This file provides code for the configuration
+ *          of the USART instances.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2025 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
@@ -25,11 +25,13 @@
 #include "stdlib.h"
 #include "main.h"
 #include "jy61p.h"
+#include "flow_decode.h"
 #define UART_RX_BUFFER_SIZE 64
 static uint8_t uartRxBuffer[UART_RX_BUFFER_SIZE];
 static uint8_t uartRxData;
 static uint8_t rxBufferIndex = 0;
 static uint8_t rxBufferFlag = 0;
+
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart4;
@@ -63,7 +65,6 @@ void MX_UART4_Init(void)
   /* USER CODE BEGIN UART4_Init 2 */
 
   /* USER CODE END UART4_Init 2 */
-
 }
 /* UART5 init function */
 void MX_UART5_Init(void)
@@ -91,7 +92,6 @@ void MX_UART5_Init(void)
   /* USER CODE BEGIN UART5_Init 2 */
 
   /* USER CODE END UART5_Init 2 */
-
 }
 /* USART1 init function */
 
@@ -120,7 +120,6 @@ void MX_USART1_UART_Init(void)
   /* USER CODE BEGIN USART1_Init 2 */
 
   /* USER CODE END USART1_Init 2 */
-
 }
 /* USART2 init function */
 
@@ -149,18 +148,17 @@ void MX_USART2_UART_Init(void)
   /* USER CODE BEGIN USART2_Init 2 */
 
   /* USER CODE END USART2_Init 2 */
-
 }
 
-void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
+void HAL_UART_MspInit(UART_HandleTypeDef *uartHandle)
 {
 
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-  if(uartHandle->Instance==UART4)
+  if (uartHandle->Instance == UART4)
   {
-  /* USER CODE BEGIN UART4_MspInit 0 */
+    /* USER CODE BEGIN UART4_MspInit 0 */
 
-  /* USER CODE END UART4_MspInit 0 */
+    /* USER CODE END UART4_MspInit 0 */
     /* UART4 clock enable */
     __HAL_RCC_UART4_CLK_ENABLE();
 
@@ -169,7 +167,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     PC10     ------> UART4_TX
     PC11     ------> UART4_RX
     */
-    GPIO_InitStruct.Pin = UART_TX_BLUETOOTH_Pin|UART_RX_BLUETOOTH_Pin;
+    GPIO_InitStruct.Pin = UART_TX_BLUETOOTH_Pin | UART_RX_BLUETOOTH_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -179,15 +177,15 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     /* UART4 interrupt Init */
     HAL_NVIC_SetPriority(UART4_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(UART4_IRQn);
-  /* USER CODE BEGIN UART4_MspInit 1 */
+    /* USER CODE BEGIN UART4_MspInit 1 */
 
-  /* USER CODE END UART4_MspInit 1 */
+    /* USER CODE END UART4_MspInit 1 */
   }
-  else if(uartHandle->Instance==UART5)
+  else if (uartHandle->Instance == UART5)
   {
-  /* USER CODE BEGIN UART5_MspInit 0 */
+    /* USER CODE BEGIN UART5_MspInit 0 */
 
-  /* USER CODE END UART5_MspInit 0 */
+    /* USER CODE END UART5_MspInit 0 */
     /* UART5 clock enable */
     __HAL_RCC_UART5_CLK_ENABLE();
 
@@ -214,15 +212,15 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     /* UART5 interrupt Init */
     HAL_NVIC_SetPriority(UART5_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(UART5_IRQn);
-  /* USER CODE BEGIN UART5_MspInit 1 */
+    /* USER CODE BEGIN UART5_MspInit 1 */
 
-  /* USER CODE END UART5_MspInit 1 */
+    /* USER CODE END UART5_MspInit 1 */
   }
-  else if(uartHandle->Instance==USART1)
+  else if (uartHandle->Instance == USART1)
   {
-  /* USER CODE BEGIN USART1_MspInit 0 */
+    /* USER CODE BEGIN USART1_MspInit 0 */
 
-  /* USER CODE END USART1_MspInit 0 */
+    /* USER CODE END USART1_MspInit 0 */
     /* USART1 clock enable */
     __HAL_RCC_USART1_CLK_ENABLE();
 
@@ -231,7 +229,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     PA9     ------> USART1_TX
     PA10     ------> USART1_RX
     */
-    GPIO_InitStruct.Pin = USART_TX_TTL_Pin|USART_RX_TTL_Pin;
+    GPIO_InitStruct.Pin = USART_TX_TTL_Pin | USART_RX_TTL_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -241,15 +239,15 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     /* USART1 interrupt Init */
     HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(USART1_IRQn);
-  /* USER CODE BEGIN USART1_MspInit 1 */
+    /* USER CODE BEGIN USART1_MspInit 1 */
 
-  /* USER CODE END USART1_MspInit 1 */
+    /* USER CODE END USART1_MspInit 1 */
   }
-  else if(uartHandle->Instance==USART2)
+  else if (uartHandle->Instance == USART2)
   {
-  /* USER CODE BEGIN USART2_MspInit 0 */
+    /* USER CODE BEGIN USART2_MspInit 0 */
 
-  /* USER CODE END USART2_MspInit 0 */
+    /* USER CODE END USART2_MspInit 0 */
     /* USART2 clock enable */
     __HAL_RCC_USART2_CLK_ENABLE();
 
@@ -258,7 +256,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     PD5     ------> USART2_TX
     PD6     ------> USART2_RX
     */
-    GPIO_InitStruct.Pin = Flow_TX_Pin|Flow_RX_Pin;
+    GPIO_InitStruct.Pin = Flow_TX_Pin | Flow_RX_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -268,20 +266,20 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     /* USART2 interrupt Init */
     HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(USART2_IRQn);
-  /* USER CODE BEGIN USART2_MspInit 1 */
+    /* USER CODE BEGIN USART2_MspInit 1 */
 
-  /* USER CODE END USART2_MspInit 1 */
+    /* USER CODE END USART2_MspInit 1 */
   }
 }
 
-void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
+void HAL_UART_MspDeInit(UART_HandleTypeDef *uartHandle)
 {
 
-  if(uartHandle->Instance==UART4)
+  if (uartHandle->Instance == UART4)
   {
-  /* USER CODE BEGIN UART4_MspDeInit 0 */
+    /* USER CODE BEGIN UART4_MspDeInit 0 */
 
-  /* USER CODE END UART4_MspDeInit 0 */
+    /* USER CODE END UART4_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_UART4_CLK_DISABLE();
 
@@ -289,19 +287,19 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
     PC10     ------> UART4_TX
     PC11     ------> UART4_RX
     */
-    HAL_GPIO_DeInit(GPIOC, UART_TX_BLUETOOTH_Pin|UART_RX_BLUETOOTH_Pin);
+    HAL_GPIO_DeInit(GPIOC, UART_TX_BLUETOOTH_Pin | UART_RX_BLUETOOTH_Pin);
 
     /* UART4 interrupt Deinit */
     HAL_NVIC_DisableIRQ(UART4_IRQn);
-  /* USER CODE BEGIN UART4_MspDeInit 1 */
+    /* USER CODE BEGIN UART4_MspDeInit 1 */
 
-  /* USER CODE END UART4_MspDeInit 1 */
+    /* USER CODE END UART4_MspDeInit 1 */
   }
-  else if(uartHandle->Instance==UART5)
+  else if (uartHandle->Instance == UART5)
   {
-  /* USER CODE BEGIN UART5_MspDeInit 0 */
+    /* USER CODE BEGIN UART5_MspDeInit 0 */
 
-  /* USER CODE END UART5_MspDeInit 0 */
+    /* USER CODE END UART5_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_UART5_CLK_DISABLE();
 
@@ -315,15 +313,15 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 
     /* UART5 interrupt Deinit */
     HAL_NVIC_DisableIRQ(UART5_IRQn);
-  /* USER CODE BEGIN UART5_MspDeInit 1 */
+    /* USER CODE BEGIN UART5_MspDeInit 1 */
 
-  /* USER CODE END UART5_MspDeInit 1 */
+    /* USER CODE END UART5_MspDeInit 1 */
   }
-  else if(uartHandle->Instance==USART1)
+  else if (uartHandle->Instance == USART1)
   {
-  /* USER CODE BEGIN USART1_MspDeInit 0 */
+    /* USER CODE BEGIN USART1_MspDeInit 0 */
 
-  /* USER CODE END USART1_MspDeInit 0 */
+    /* USER CODE END USART1_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_USART1_CLK_DISABLE();
 
@@ -331,19 +329,19 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
     PA9     ------> USART1_TX
     PA10     ------> USART1_RX
     */
-    HAL_GPIO_DeInit(GPIOA, USART_TX_TTL_Pin|USART_RX_TTL_Pin);
+    HAL_GPIO_DeInit(GPIOA, USART_TX_TTL_Pin | USART_RX_TTL_Pin);
 
     /* USART1 interrupt Deinit */
     HAL_NVIC_DisableIRQ(USART1_IRQn);
-  /* USER CODE BEGIN USART1_MspDeInit 1 */
+    /* USER CODE BEGIN USART1_MspDeInit 1 */
 
-  /* USER CODE END USART1_MspDeInit 1 */
+    /* USER CODE END USART1_MspDeInit 1 */
   }
-  else if(uartHandle->Instance==USART2)
+  else if (uartHandle->Instance == USART2)
   {
-  /* USER CODE BEGIN USART2_MspDeInit 0 */
+    /* USER CODE BEGIN USART2_MspDeInit 0 */
 
-  /* USER CODE END USART2_MspDeInit 0 */
+    /* USER CODE END USART2_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_USART2_CLK_DISABLE();
 
@@ -351,13 +349,13 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
     PD5     ------> USART2_TX
     PD6     ------> USART2_RX
     */
-    HAL_GPIO_DeInit(GPIOD, Flow_TX_Pin|Flow_RX_Pin);
+    HAL_GPIO_DeInit(GPIOD, Flow_TX_Pin | Flow_RX_Pin);
 
     /* USART2 interrupt Deinit */
     HAL_NVIC_DisableIRQ(USART2_IRQn);
-  /* USER CODE BEGIN USART2_MspDeInit 1 */
+    /* USER CODE BEGIN USART2_MspDeInit 1 */
 
-  /* USER CODE END USART2_MspDeInit 1 */
+    /* USER CODE END USART2_MspDeInit 1 */
   }
 }
 
@@ -383,34 +381,34 @@ void UART_StartReceive(UART_HandleTypeDef *huart)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-  if(huart->Instance == UART4)
+  if (huart->Instance == UART4)
   {
 
-    if(uartRxData == '\r' || uartRxData == '\n')
+    if (uartRxData == '\r' || uartRxData == '\n')
     {
-      if(rxBufferIndex > 0)
+      if (rxBufferIndex > 0)
       {
         uartRxBuffer[rxBufferIndex] = 0;
         rxBufferFlag = 1;
         rxBufferIndex = 0;
       }
     }
-    else if(rxBufferIndex < UART_RX_BUFFER_SIZE - 1)
+    else if (rxBufferIndex < UART_RX_BUFFER_SIZE - 1)
     {
       uartRxBuffer[rxBufferIndex++] = uartRxData;
     }
 
     HAL_UART_Receive_IT(&huart4, &uartRxData, 1);
   }
-  else if(huart->Instance == UART5) // Gyro Uart
+  else if (huart->Instance == UART5) // Gyro Uart
   {
-    jy61p_ReceiveData(g_usart5_receivedata); // use jy61p to process the data
+    jy61p_ReceiveData(g_usart5_receivedata);                // use jy61p to process the data
     HAL_UART_Receive_IT(&huart5, &g_usart5_receivedata, 1); // contiune
   }
-  else if(huart->Instance == USART2) // TTL Uart
+  else if (huart->Instance == USART2) // TTL Uart
   {
-    HAL_UART_Receive_IT(&huart2, &ch, 1); // continue
-    printf("Received char: %c\n", ch); // Print received character
+    upnotof_parse_char(flowRxByte);               // Parse the optical flow data
+    HAL_UART_Receive_IT(&huart2, &flowRxByte, 1); // Print received character
   }
 }
 /* USER CODE END 1 */

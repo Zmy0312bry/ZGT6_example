@@ -38,7 +38,7 @@ extern "C" {
 /* USER CODE BEGIN ET */
 
 extern uint8_t g_usart5_receivedata;
-extern unsigned char ch;
+extern uint8_t flowRxByte;
 
 /* USER CODE END ET */
 
